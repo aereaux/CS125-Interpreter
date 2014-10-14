@@ -1,4 +1,5 @@
 import os
+import sys
 
 def setcodes(num, registers):
     registers["n"] = False
@@ -10,7 +11,7 @@ def setcodes(num, registers):
 
 def execute(lines):
     registers = {"r0":0, "r1":0, "r2":0, "r3":0, "r4":0, "r4":0, "r5":0, "r6":0, "r7":0, "pc":0, "n":0, "z":0, "p":0}
-    memory = [3, 10, 0]
+    memory = [int(x) for x in lines.pop(0).split(',')]
     registers["pc"] = 0
     while registers["pc"] < len(lines):
         line = lines[registers["pc"]]
@@ -61,7 +62,7 @@ def entry_point(argv):
         print("You must supply a filename")
         return 1
 
-    run(os.open(filename, os.O_RDONLY, 0777))
+    run(os.open(filename, os.O_RDONLY, 0o0777))
     return 0
 
 def target(*args):

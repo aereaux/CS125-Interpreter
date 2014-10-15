@@ -1,4 +1,4 @@
-4,11,0
+3,10,0
 zero_reg r1
 store r1 -> [r1+2]
 load r2 <- [r1+0]

@@ -1,0 +1,6 @@
+-3,0
+zero_reg r1
+load r2 <- [r1+0]
+br.zp 1
+sub r1 - r2 -> r2
+store r2 -> [r1+1]

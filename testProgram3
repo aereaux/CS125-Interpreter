@@ -1,0 +1,11 @@
+4,18,1,5,42,9,0,74,3,36
+zero_reg r1
+zero_reg r2
+add r2 + 1 -> r2
+sub r2 - 10 -> r3
+br.p 5
+load r4 <- [r1+0]
+add r4 + r2 -> r4
+store r4 -> [r1+0]
+add r1 + 1 -> r1
+br.pnz -8

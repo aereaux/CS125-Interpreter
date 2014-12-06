@@ -5,9 +5,7 @@ import subprocess
 
 class GUIApp(App):
     def OnInit(self):
-        self.program = Program()
-
-        frame = GUIFrame(None, -1, "GUI", self.program)
+        frame = GUIFrame(None, -1, "GUI")
         frame.Show(True)
 
         self.SetTopWindow(frame)
@@ -16,15 +14,28 @@ class GUIApp(App):
 
 
 class GUIFrame(Frame):
-    def __init__(self, parent, id, title, program):
+    def __init__(self, parent, id, title):
         wx.Frame.__init__(self, parent, id, title)
 
+        program = Program()
         self.program = program
 
+        menuBar = wx.MenuBar()
+        fileMenu = wx.Menu()
+        openMenuItem = fileMenu.Append(wx.NewId(), "Open", "Open a program")
+        saveMenuItem = fileMenu.Append(wx.NewId(), "Save", "Save the program")
+        exitMenuItem = fileMenu.Append(wx.NewId(), "Exit", "Exit the application")
+
+        menuBar.Append(fileMenu, "&File")
+        self.SetMenuBar(menuBar)
+
+        self.Bind(wx.EVT_MENU, self.OnOpenMenu, openMenuItem)
+        self.Bind(wx.EVT_MENU, self.OnSaveMenu, saveMenuItem)
+        self.Bind(wx.EVT_MENU, self.OnCloseWindow, exitMenuItem)
         self.Bind(wx.EVT_CLOSE, self.OnCloseWindow)
 
         self.editor = wx.stc.StyledTextCtrl(self)
-        self.button = Button(self, label="EXECUTE")
+        self.button = Button(self, label="Save and Run")
         self.output = TextCtrl(self, style=wx.TE_READONLY)
 
         self.button.Bind(wx.EVT_BUTTON, self.OnButtonPress)
@@ -47,10 +58,17 @@ class GUIFrame(Frame):
         out = self.program.run(self.editor.GetText())
         self.output.ChangeValue(out)
 
+    def OnOpenMenu(self, event):
+        self.program = Program()
+        self.editor.SetText(self.program.read())
+
+    def OnSaveMenu(self, event):
+        self.program.save(self.editor.GetText())
+
 
 class Program:
-    def __init__(self, filename = None):
-        if(filename == None): filename = "test.txt"
+    def __init__(self, filename=None):
+        if filename is None: filename = "test.txt"
         self.filename = os.path.join(os.path.expanduser("~"), filename)
 
     def save(self, text):
@@ -59,9 +77,15 @@ class Program:
         file.close()
 
     def run(self, text = None):
-        if text != None: self.save(text)
+        if text is not None: self.save(text)
         out = subprocess.check_output(["./interpreterMain-c", self.filename])
         return out.strip()
+
+    def read(self):
+        file = open(self.filename, "r+")
+        text = file.read()
+        file.close()
+        return text
 
 
 if __name__ == "__main__":

@@ -59,7 +59,12 @@ class GUIFrame(Frame):
         self.output.ChangeValue(out)
 
     def OnOpenMenu(self, event):
-        self.program = Program()
+        dlg = wx.FileDialog(self, style=wx.OPEN)
+        if dlg.ShowModal() == wx.ID_OK:
+            path = dlg.GetPath()
+        dlg.Destroy()
+
+        self.program = Program(path)
         self.editor.SetText(self.program.read())
 
     def OnSaveMenu(self, event):
@@ -68,11 +73,11 @@ class GUIFrame(Frame):
 
 class Program:
     def __init__(self, filename=None):
-        if filename is None: filename = "test.txt"
-        self.filename = os.path.join(os.path.expanduser("~"), filename)
+        if filename is None: filename = ".swap"
+        self.filename = os.path.join(os.curdir, filename)
 
     def save(self, text):
-        file = open(self.filename, "w+")
+        file = open(self.filename, "w")
         file.write(text)
         file.close()
 
@@ -82,7 +87,7 @@ class Program:
         return out.strip()
 
     def read(self):
-        file = open(self.filename, "r+")
+        file = open(self.filename, "r")
         text = file.read()
         file.close()
         return text

@@ -5,7 +5,7 @@ import subprocess
 
 class GUIApp(App):
     def OnInit(self):
-        frame = GUIFrame(None, -1, "GUI")
+        frame = GUIFrame(None, -1, "ASMGUI")
         frame.Show(True)
 
         self.SetTopWindow(frame)
@@ -22,13 +22,17 @@ class GUIFrame(Frame):
 
         menuBar = wx.MenuBar()
         fileMenu = wx.Menu()
+        newMenuItem = fileMenu.Append(wx.NewId(), "New", "Create a new program")
         openMenuItem = fileMenu.Append(wx.NewId(), "Open", "Open a program")
         saveMenuItem = fileMenu.Append(wx.NewId(), "Save", "Save the program")
+        saveAsMenuItem = fileMenu.Append(wx.NewId(), "Save As", "Save to a different file")
         exitMenuItem = fileMenu.Append(wx.NewId(), "Exit", "Exit the application")
 
         menuBar.Append(fileMenu, "&File")
         self.SetMenuBar(menuBar)
 
+        self.Bind(wx.EVT_MENU, self.OnSaveAsMenu, saveAsMenuItem)
+        self.Bind(wx.EVT_MENU, self.OnNewMenu, newMenuItem)
         self.Bind(wx.EVT_MENU, self.OnOpenMenu, openMenuItem)
         self.Bind(wx.EVT_MENU, self.OnSaveMenu, saveMenuItem)
         self.Bind(wx.EVT_MENU, self.OnCloseWindow, exitMenuItem)
@@ -68,6 +72,20 @@ class GUIFrame(Frame):
         self.editor.SetText(self.program.read())
 
     def OnSaveMenu(self, event):
+        if self.program.filename.endswith(".swap"): self.OnSaveAsMenu(event)
+        else: self.program.save(self.editor.GetText())
+
+    def OnNewMenu(self, event):
+        self.program = Program()
+        self.editor.SetText("")
+
+    def OnSaveAsMenu(self, event):
+        dlg = wx.FileDialog(self, style=wx.SAVE)
+        if dlg.ShowModal() == wx.ID_OK:
+            path = dlg.GetPath()
+        dlg.Destroy()
+
+        self.program = Program(path)
         self.program.save(self.editor.GetText())
 
 

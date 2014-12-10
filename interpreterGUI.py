@@ -5,6 +5,7 @@ import subprocess
 
 class GUIApp(App):
     def OnInit(self):
+
         frame = GUIFrame(None, -1, "ASMGUI")
         frame.Show(True)
 
@@ -40,17 +41,28 @@ class GUIFrame(Frame):
 
         self.editor = wx.stc.StyledTextCtrl(self)
         self.button = Button(self, label="Save and Run")
-        self.output = TextCtrl(self, style=wx.TE_READONLY)
+        self.clearButton = Button(self, label="Clear")
+        self.output = wx.stc.StyledTextCtrl(self, style=wx.TE_READONLY)
 
+        font = wx.Font(9, wx.FONTFAMILY_MODERN, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL)
+        face = font.GetFaceName()
+        size = font.GetPointSize()
+        self.output.StyleSetSpec(wx.stc.STC_STYLE_DEFAULT,"face:%s,size:%d" % (face, size))
+
+        self.clearButton.Bind(wx.EVT_BUTTON, self.OnClearButton)
         self.button.Bind(wx.EVT_BUTTON, self.OnButtonPress)
 
+        brSizer = BoxSizer(VERTICAL)
+        brSizer.Add(self.button, 1)
+        brSizer.Add(self.clearButton, 1)
+
         botSizer = BoxSizer(HORIZONTAL)
-        botSizer.Add(self.output, 1)
-        botSizer.Add(self.button)
+        botSizer.Add(self.output, 1, flag=wx.EXPAND)
+        botSizer.Add(brSizer, flag=wx.EXPAND)
 
         sizer = BoxSizer(VERTICAL)
         sizer.Add(self.editor, 1, flag=EXPAND)
-        sizer.Add(botSizer, flag=EXPAND)
+        sizer.Add(botSizer, 1, flag=EXPAND)
         self.SetSizer(sizer)
 
 
@@ -88,6 +100,9 @@ class GUIFrame(Frame):
         self.program = Program(path)
         self.program.save(self.editor.GetText())
 
+    def OnClearButton(self, event):
+        self.output.ClearAll()
+
 
 class Program:
     def __init__(self, filename=None):
@@ -101,8 +116,8 @@ class Program:
 
     def run(self, text = None):
         if text is not None: self.save(text)
-        out = subprocess.check_output(["./interpreterMain-c", self.filename])
-        return out.strip()
+        out = subprocess.check_output(['python2', 'interpreterMain.py', self.filename])
+        return out
 
     def read(self):
         file = open(self.filename, "r")
